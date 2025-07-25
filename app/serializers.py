@@ -3,15 +3,19 @@ from .calculos import CalculoOperacoes #separacao de responsabilidade com operac
 from rest_framework import serializers
 
 class UsuarioSerializer(serializers.ModelSerializer):
+    "" "read_only para forcar o resultado ser automatico e nao solicitar ele na requisicao """
+    usuario_id = serializers.IntegerField(read_only=True)
     class Meta:
         model = Usuario
         fields = '__all__'
+        read_only_fields = ['usuario_id','stlnclusao']  #preenchimento automatico
+
 
 class OperacaoSerializer(serializers.ModelSerializer):
-    usuario_id = serializers.IntegerField(read_only=True) 
     class Meta:
         model = Operacao
         fields = ['idoperacao', 'usuario_id', 'parametros', 'resultado']
+        read_only_fields = ['idoperacao','usuario_id', 'resultado']  #preenchimento automatico
     
     def validate_parametros(self, value):
         """Valida se os parâmetros estão no formato correto (ex: '1+2')"""

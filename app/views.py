@@ -11,6 +11,8 @@ from rest_framework.renderers import JSONRenderer, BrowsableAPIRenderer
 
 from rest_framework.decorators import api_view
 from rest_framework import status
+import json
+
 
 
 class RegistroUsuario(generics.CreateAPIView):
@@ -26,44 +28,21 @@ class DetalheUsuario(generics.RetrieveAPIView):
 class DashboardOperacao(APIView):
     renderer_classes = [JSONRenderer, BrowsableAPIRenderer]
     permission_classes = [AllowAny]
-    
+
     def get(self, request, usuario_id):
         operacoes = Operacao.objects.filter(usuario_id=usuario_id)
         serializer = OperacaoSerializer(operacoes, many=True)
         return Response(serializer.data)
 
     def post(self, request, usuario_id):
-        try:
-            print("Dados brutos:", request.body)  # Debug adicional
-            print("Dados parseados:", request.data) 
-            
-            # Verificação explícita dos dados
-            if not request.data or 'parametros' not in request.data:
-                return Response(
-                    {"error": "O campo 'parametros' é obrigatório no formato {'parametros': '5+3'}"},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            
-            parametros = str(request.data['parametros']).strip()
-            resultado = CalculoOperacoes.calcular_parametros(parametros)
-            
-            if resultado is None:
-                return Response(
-                    {"error": "Parâmetros inválidos. Use formato 'número+operador+número' (Ex: 5+3)"},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            
-            operacao = Operacao.objects.create(
-                usuario_id=usuario_id,
-                parametros=parametros,
-                resultado=resultado
-            )
-            
-            return Response(OperacaoSerializer(operacao).data, status=status.HTTP_201_CREATED)
-            
-        except Exception as e:
-            return Response(
-                {"error": f"Erro no servidor: {str(e)}"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+        usuario = get_object_or_404(Usuario, usuario_id=usuario_id)
+        print("Dados recebidos:", request.data)  # Para depuração
 
+        serializer = OperacaoSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(usuario=usuario)  # Salva com o usuário associado
+            return Response(
+                {"id": serializer.instance.idoperacao, "resultado": serializer.instance.resultado},
+                status=status.HTTP_201_CREATED
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

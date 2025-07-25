@@ -19,6 +19,9 @@ class Operacao(models.Model):
     resultado = models.CharField(max_length=100)
     ativo = models.BooleanField(default=True)
     
+    class Meta:
+        db_table = 'app_operacao' 
+        
     def __str__(self):
         return f"{self.usuario} - {self.parametros} = {self.resultado}"
    
