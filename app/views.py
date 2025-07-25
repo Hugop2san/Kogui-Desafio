@@ -15,12 +15,12 @@ import json
 
 
 
-class RegistroUsuario(generics.CreateAPIView):
+class RegistroUsuario(generics.CreateAPIView): # Natureza POST
     permission_classes = [AllowAny]
     queryset = Usuario.objects.all()
     serializer_class = UsuarioSerializer
     
-class DetalheUsuario(generics.RetrieveAPIView):
+class DetalheUsuario(generics.RetrieveAPIView): # Natureza GET 
     permission_classes = [AllowAny]
     queryset = Usuario.objects.all()
     serializer_class = UsuarioSerializer
