@@ -1,6 +1,6 @@
 from .models import Usuario, Operacao
+from .calculos import CalculoOperacoes #separacao de responsabilidade com operacao logica
 from rest_framework import serializers
-from calculos import CalculoOperacoes #separacao de responsabilidade com operacao logica
 
 class UsuarioSerializer(serializers.ModelSerializer):
     class Meta:
@@ -8,17 +8,15 @@ class UsuarioSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class OperacaoSerializer(serializers.ModelSerializer):
+    usuario_id = serializers.IntegerField(read_only=True) 
     class Meta:
         model = Operacao
-        fields = ['idoperacao', 'idusuario', 'parametros', 'resultado']
-        extra_kwargs = {
-            'resultado': {'read_only': True}  # Resultado é calculado, não enviado pelo usuário
-        }
+        fields = ['idoperacao', 'usuario_id', 'parametros', 'resultado']
     
     def validate_parametros(self, value):
         """Valida se os parâmetros estão no formato correto (ex: '1+2')"""
         if CalculoOperacoes.calcular_parametros(value) is None:
-            raise serializers.ValidationError("Formato inválido >>>>> 5+3 ")
+            raise serializers.ValidationError("Formato inválido, digite formato certo >>>>> 5+3 ")
         return value
     
     def create(self, validated_data):

@@ -1,11 +1,11 @@
 from django.db import models
 
 class Usuario(models.Model):
-    IDusuario   = models.AutoField(primary_key=True) 
+    usuario_id   = models.AutoField(primary_key=True) 
     nome_usuario        = models.CharField(max_length=300)
-    Email       = models.CharField(max_length=300)
-    Senha       = models.CharField(max_length=300)
-    Stlnclusao  = models.BooleanField(default=True)
+    email       = models.CharField(max_length=300)
+    senha       = models.CharField(max_length=300)
+    stlnclusao  = models.BooleanField(default=True)
     
     def __str__(self):
         return self.nome_usuario
@@ -13,11 +13,12 @@ class Usuario(models.Model):
 
 
 class Operacao(models.Model):
-    IDOperacao      = models.IntegerField(primary_key=True)
-    IDUsiario       = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='operacoes') 
-    Parametros      = models.CharField(max_length=2)
-    Resultado       = models.CharField(max_length=1000)
-    Stlnclusao      = models.BooleanField(default=True)
+    idoperacao = models.AutoField(primary_key=True)  
+    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='operacoes')
+    parametros = models.CharField(max_length=20) 
+    resultado = models.CharField(max_length=100)
+    ativo = models.BooleanField(default=True)
     
     def __str__(self):
-        return f" {self.IDUsiario.nome_usuario} - {self.Parametros} - {self.Resultado}"
+        return f"{self.usuario} - {self.parametros} = {self.resultado}"
+   
