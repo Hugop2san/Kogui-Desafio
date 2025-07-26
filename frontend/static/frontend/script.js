@@ -27,9 +27,9 @@ async function loginUsuario() {
       return;
     }
 
-    //salva dados do usuaario logado
-    usuarioId = data.usuario.usuario_id;    
-    usuarioNome = data.usuario.nome_usuario; 
+    //salva dados do usuaario logado no front
+    usuarioId = data.usuario.usuario_id;      //  id para carregar a operação do usuario
+    usuarioNome = data.usuario.nome_usuario;  //  nome para mensagem de vem vindo
 
     msg.textContent = data.mensagem;
 
@@ -38,11 +38,14 @@ async function loginUsuario() {
     document.getElementById('user-nome').textContent = usuarioNome;
 
     loadHistory();
-  } catch (error) {
+  } 
+  catch (error) {
     msg.textContent = "Erro ao conectar ao servidor.";
   }
 }
 
+//calculadora
+//REALIZAR ESTILIZAÇÃO
 const display = document.getElementById('display');
 const historyList = document.getElementById('history');
 
@@ -79,17 +82,17 @@ async function calculate() {
       body: JSON.stringify({ parametros })
     });
 
+    const data = await response.json();   // json para a def
+
     if (!response.ok) {
-        const err = await response.json();
-        display.textContent = err.parametros || 'Erro'; //tratamento para capturar o tipo do erro para me localizar
-        return;
+      display.textContent = err.parametros || 'Erro'; //tratamento para capturar o tipo do erro para me localizar
+      return;
     }
 
-   
+    display.textContent = data.resultado // exibe o  resultado de logicas no serializer
+
     loadHistory();
-  } 
-  
-  catch (error) {
+  }catch (error) {
     display.textContent = 'Erro';
   }
 }
@@ -118,8 +121,7 @@ async function loadHistory() {
       historyList.appendChild(li);
       
     });
-  } 
-  catch (error) {
+  }catch (error) {
     console.error('Erro ao carregar histórico:', error);
   }
 }

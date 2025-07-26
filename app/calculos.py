@@ -13,7 +13,7 @@ class CalculoOperacoes:
             valor1 = float(valor1)
             valor2 = float(valor2)
             
-            # Calcula (substitua por switch-case se preferir)
+            # Cacula
             if operador == '+':
                 return valor1 + valor2
             elif operador == '-':
@@ -21,7 +21,7 @@ class CalculoOperacoes:
             elif operador == '*':
                 return valor1 * valor2
             elif operador == '/':
-                return valor1 / valor2 if valor2 != 0 else None
+                return valor1 / valor2 if valor2 != 0 else "Nao pode dividir por zero."
             else:
                 return None
         except:

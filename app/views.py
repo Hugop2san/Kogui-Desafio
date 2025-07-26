@@ -36,16 +36,18 @@ class DashboardOperacao(APIView):
 
     def post(self, request, usuario_id):
         usuario = get_object_or_404(Usuario, usuario_id=usuario_id)
-        print("Dados recebidos:", request.data)  # Para depuração
+        parametros = request.data.get('parametros', '')
 
-        serializer = OperacaoSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(usuario=usuario)  # Salva com o usuário associado
-            return Response(
-                {"id": serializer.instance.idoperacao, "resultado": serializer.instance.resultado},
-                status=status.HTTP_201_CREATED
-            )
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        resultado = CalculoOperacoes.calcular_parametros(parametros)
+        if resultado is None:
+            return Response({"error": "Expressão inválida ou divisão por zero."}, status=status.HTTP_400_BAD_REQUEST)
+
+        operacao = Operacao.objects.create(usuario=usuario, parametros=parametros, resultado=resultado)
+
+        return Response(
+            {"id": operacao.idoperacao, "resultado": operacao.resultado},
+            status=status.HTTP_201_CREATED
+        )
     
     
 # VIEW que alimente meu frontend
@@ -56,35 +58,25 @@ class LoginOuCadastroUsuario(APIView):
         nome = request.data.get('nome_usuario')
         email = request.data.get('email')
         senha = request.data.get('senha')
-        
-        ##obrigando o usario a preencher campos
-        if not nome or not email or not senha:
-            return Response({"error": "Nome, email e senha são obrigatórios."},
-                            status=status.HTTP_400_BAD_REQUEST)
 
-        # realizando para caso o usuario nao exista, a formatacao minusculo dos campos, para padrao...
-        email = email.lower().strip
-        senha = senha.lower().strip
-        nome = nome.lower().strip
-        
-        # ou cria com criado ou se criado for false usuario carrega vsalores default existentes no banco
+        if not nome or not email or not senha:
+            return Response({"error": "Preencha todos os campos."}, status=status.HTTP_400_BAD_REQUEST)
+
+        email = email.lower()
+        senha = senha.lower()
+        nome = nome.lower()
+
         usuario, criado = Usuario.objects.get_or_create(
             email=email,
-            defaults={
-                'nome_usuario': nome,
-                'senha': senha
-            }
+            defaults={'nome_usuario': nome, 'senha': senha}
         )
 
-        # Se o usuário já existia mas a senha é diferente, configura erro de senha
+        # Se já existe, validar a senha
         if not criado and usuario.senha != senha:
-            return Response({"error": "Senha incorreta para este email."},
-                            status=status.HTTP_401_UNAUTHORIZED)
-            
+            return Response({"error": "Senha incorreta."}, status=status.HTTP_400_BAD_REQUEST)
 
-        #serializo o objeto para login
         serializer = UsuarioSerializer(usuario)
         return Response({
-            "mensagem": "Usuário criado com sucesso!" if criado else "Login bem-sucedido.", 
+            "mensagem": "Usuário criado com sucesso!" if criado else "Login bem-sucedido.",
             "usuario": serializer.data
         }, status=status.HTTP_200_OK)
