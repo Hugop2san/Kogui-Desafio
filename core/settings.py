@@ -39,6 +39,7 @@ REST_FRAMEWORK = {
 # Application definition
 
 INSTALLED_APPS = [
+    'frontend', 
     'rest_framework',
     'app',
     'django.contrib.admin',
